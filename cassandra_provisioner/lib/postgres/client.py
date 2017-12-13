@@ -19,13 +19,19 @@ class PostgresClient(Service):
         return self.connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
 
-    def _get_one_row(self, query, params=None):
+    def get_one_row(self, query, params=None):
         c = self._get_new_cursor()
         c.execute(query, params)
-        return c.fetchall()
-        pass
+        return c.fetchone()
 
-    def _get_many_rows(self, query, params=None):
+    def get_many_rows(self, query, params=None):
         c = self._get_new_cursor()
         c.execute(query, params)
         return c.fetchall()
+
+    def execute(self, query, params):
+        if self.connection is None:
+            self.connect()
+        c = self._get_new_cursor()
+        c.execute(query, params)
+        self.connection.commit()
